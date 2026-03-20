@@ -5,9 +5,12 @@ __pycache__/
 venv/
 .env
 
-# Data (ne pas partager les données perso)
-data/
+# Data (ne pas partager la base de données)
 *.db
+data/debug_*.html
+
+# Garder export.json pour le dashboard en ligne
+!data/export.json
 
 # macOS
 .DS_Store
