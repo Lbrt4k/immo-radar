@@ -26,6 +26,15 @@ DONNÉES MARCHÉ:
 - Écart prix/marché: {listing.get('dvf_price_gap', 'N/A')}%
 - Potentiel rénovation DPE: {listing.get('dpe_renovation_potential', 'N/A')}
 
+CRITÈRES D'INVESTISSEMENT (profil investisseur):
+1. Impôts: Estime l'impact fiscal probable (revenus fonciers, plus-value)
+2. Frais syndic: Estime les frais annuels de copropriété
+3. Type de chauffage: Identifie le type et évalue l'efficacité énergétique
+4. Frais des charges: Estime les charges communes annuelles
+5. Taux de crédits: Recommande un taux de financement approprié
+6. Frais de Notaire: Estime les frais d'acquisition (~7-8%)
+7. Opération Blanche: Évalue si loyer net ≥ paiements crédits (rentabilité)
+
 CRITÈRES DE PONDÉRATION:
 - Écart prix vs marché: {SCORING_WEIGHTS['price_gap']*100}%
 - Rendement locatif: {SCORING_WEIGHTS['rental_yield']*100}%
@@ -43,6 +52,15 @@ Réponds UNIQUEMENT en JSON valide avec ce format:
     "dpe_score": <0-100>,
     "location_score": <0-100>,
     "surface_value_score": <0-100>
+  }},
+  "investor_analysis": {{
+    "estimated_taxes_annual": "<estimé>",
+    "estimated_syndic_fees_annual": "<estimé>",
+    "heating_type": "<type>",
+    "estimated_charges_annual": "<estimé>",
+    "recommended_credit_rate": "<taux %>",
+    "estimated_notary_fees": "<estimé>",
+    "blank_operation_feasible": <true|false>
   }},
   "estimated_value": <valeur estimée en euros>,
   "rental_yield": <rendement locatif estimé en %>,
