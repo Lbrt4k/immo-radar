@@ -547,7 +547,7 @@ function renderListings(listings) {
                 ${l.price_gap_percent>0?'+':''}${l.price_gap_percent.toFixed(1)}% vs marché
               </span>
             ` : ''}
-            ${l.rental_yield ? `<span class="metric metric-yield ${l.rental_yield>=7?'high':''}">Rendement : ${l.rental_yield.toFixed(1)}%</span>` : ''}
+            ${l.rental_yield && typeof l.rental_yield === 'number' ? `<span class="metric metric-yield ${l.rental_yield>=7?'high':''}">Rendement : ${parseFloat(l.rental_yield).toFixed(1)}%</span>` : ''}
           </div>
           <div class="listing-time">${timeAgo(l.scraped_at)}</div>
         </div>
