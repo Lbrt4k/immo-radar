@@ -2,7 +2,7 @@ name: ImmoRadar - Scraping automatique
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Toutes les heures
+    - cron: '0 */4 * * *'  # Toutes les 4 heures
   workflow_dispatch: {}     # Permet de lancer manuellement
 
 jobs:

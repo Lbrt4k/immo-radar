@@ -1,6 +1,7 @@
 """ImmoRadar - Point d'entrée principal"""
 import argparse, logging, sys, time
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Setup logging
 logging.basicConfig(
@@ -19,8 +20,20 @@ from scorer import score_listings
 from alerts import send_alerts, send_daily_recap
 
 
+def _scrape_source(name, scraper):
+    """Scrape une source (utilisé en parallèle)."""
+    try:
+        logger.info(f"--- {name} ---")
+        new = scraper.scrape()
+        logger.info(f"{name}: {len(new)} nouvelles annonces")
+        return new
+    except Exception as e:
+        logger.error(f"{name} erreur: {e}")
+        return []
+
+
 def run_scrape():
-    """Lance le scraping sur toutes les sources."""
+    """Lance le scraping sur toutes les sources en parallèle."""
     logger.info("=" * 50)
     logger.info("SCRAPING — Recherche de nouvelles annonces...")
 
@@ -28,17 +41,15 @@ def run_scrape():
     scrapers = [
         ("LeBonCoin", LeBonCoinScraper()),
         ("PAP.fr", PapScraper()),
-        ("Bien'ici", BieniciScraper()),
     ]
 
-    for name, scraper in scrapers:
-        try:
-            logger.info(f"--- {name} ---")
-            new = scraper.scrape()
-            all_new.extend(new)
-            logger.info(f"{name}: {len(new)} nouvelles annonces")
-        except Exception as e:
-            logger.error(f"{name} erreur: {e}")
+    # Lancer les scrapers en parallèle
+    with ThreadPoolExecutor(max_workers=len(scrapers)) as executor:
+        futures = {executor.submit(_scrape_source, name, s): name for name, s in scrapers}
+        for future in as_completed(futures):
+            result = future.result()
+            if result:
+                all_new.extend(result)
 
     logger.info(f"Total nouvelles annonces: {len(all_new)}")
     return all_new
@@ -69,7 +80,7 @@ def run_enrich():
             update_listing_enrichment(listing["id"], data)
             enriched += 1
 
-        time.sleep(0.5)
+        time.sleep(0.2)
 
     logger.info(f"Enrichissement: {enriched}/{len(listings)}")
     return enriched

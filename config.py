@@ -46,7 +46,7 @@ SCRAPING_CONFIG = {
         "Connection": "keep-alive",
         "Upgrade-Insecure-Requests": "1",
     },
-    "request_delay": 3,
+    "request_delay": 1.5,
     "max_listings_per_source": 50,
 }
 
