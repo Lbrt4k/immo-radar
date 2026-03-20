@@ -362,33 +362,64 @@ body::before {
 
 <script>
 // ===== DATA =====
-// En production, charger depuis data/export.json :
-// fetch('data/export.json').then(r=>r.json()).then(data => init(data))
-const DATA = {
-  stats: {
-    total_listings: 247, scored_listings: 189, hot_deals: 23, avg_score: 58.4,
-    active_sources: 2, new_today: 34,
-    top_cities: [
-      { city:"Lyon", count:89, avg_score:62.1 },
-      { city:"Marseille", count:78, avg_score:55.8 },
-      { city:"Villeurbanne", count:42, avg_score:59.3 },
-      { city:"Aix-en-Provence", count:38, avg_score:51.2 },
-      { city:"Saint-Étienne", count:31, avg_score:64.7 },
-    ]
-  },
-  listings: [
-    { id:"a1", source:"pap", title:"Appartement T3 lumineux — Vue dégagée, proche métro", price:185000, surface:72, rooms:3, city:"Lyon 3ème", postal_code:"69003", dpe_letter:"D", score:92, price_gap_percent:-18.5, rental_yield:7.2, score_reasons:["Prix 18.5% sous le marché DVF (45 transactions)","Rentabilité brute estimée > 7%","Signal détecté : vente urgente succession"], url:"#", status:"nouveau", scraped_at:"2026-03-20T14:30:00" },
-    { id:"b2", source:"bienici", title:"Maison 5 pièces avec jardin — Quartier calme", price:275000, surface:110, rooms:5, city:"Villeurbanne", postal_code:"69100", dpe_letter:"E", score:87, price_gap_percent:-14.2, rental_yield:6.1, score_reasons:["DPE E : potentiel rénovation +18% de valeur","Prix sous marché de 14.2%","Quartier Gratte-Ciel en hausse constante"], url:"#", status:"nouveau", scraped_at:"2026-03-20T13:15:00" },
-    { id:"c3", source:"pap", title:"Studio idéal investissement locatif — Meublé", price:78000, surface:25, rooms:1, city:"Marseille 5ème", postal_code:"13005", dpe_letter:"F", score:84, price_gap_percent:-22.1, rental_yield:9.8, score_reasons:["Rendement brut exceptionnel 9.8%","DPE F : +18% de valeur après rénovation (coût ~500€/m²)","Quartier proche fac, forte demande locative"], url:"#", status:"nouveau", scraped_at:"2026-03-20T12:00:00" },
-    { id:"d4", source:"bienici", title:"T2 rénové centre-ville Jean Macé", price:142000, surface:45, rooms:2, city:"Lyon 7ème", postal_code:"69007", dpe_letter:"C", score:76, price_gap_percent:-8.3, rental_yield:5.4, score_reasons:["Bon rapport qualité-prix pour le quartier","DPE C correct, pas de travaux énergie","Quartier Jean Macé très dynamique"], url:"#", status:"analysé", scraped_at:"2026-03-20T11:30:00" },
-    { id:"e5", source:"pap", title:"Grand T4 à rénover — Potentiel énorme", price:195000, surface:95, rooms:4, city:"Marseille 6ème", postal_code:"13006", dpe_letter:"G", score:81, price_gap_percent:-25.4, rental_yield:5.9, score_reasons:["Prix -25% vs marché : très sous-évalué","DPE G : potentiel rénovation +25% de valeur","Quartier Castellane premium en hausse"], url:"#", status:"nouveau", scraped_at:"2026-03-19T18:00:00" },
-    { id:"f6", source:"bienici", title:"Appartement T2 avec balcon sud", price:165000, surface:48, rooms:2, city:"Lyon 8ème", postal_code:"69008", dpe_letter:"B", score:62, price_gap_percent:-3.1, rental_yield:4.2, score_reasons:["DPE B excellent, aucun travaux nécessaire","Légèrement sous le marché (-3%)","Pas de signal d'urgence particulier"], url:"#", status:"analysé", scraped_at:"2026-03-19T16:00:00" },
-    { id:"g7", source:"pap", title:"Studio meublé — Idéal étudiant", price:65000, surface:18, rooms:1, city:"Saint-Étienne", postal_code:"42000", dpe_letter:"E", score:88, price_gap_percent:-30.2, rental_yield:11.2, score_reasons:["Rendement brut > 11% — exceptionnel","Prix -30% vs marché (ville en hausse)","Forte demande étudiante, location garantie"], url:"#", status:"nouveau", scraped_at:"2026-03-20T09:00:00" },
-    { id:"h8", source:"bienici", title:"Maison T3 avec garage — Rénovée", price:220000, surface:85, rooms:3, city:"Aix-en-Provence", postal_code:"13100", dpe_letter:"D", score:55, price_gap_percent:2.3, rental_yield:3.8, score_reasons:["Prix au niveau du marché (+2.3%)","Rendement moyen pour la zone","Quartier stable mais pas de signal"], url:"#", status:"archivé", scraped_at:"2026-03-19T10:00:00" },
-    { id:"i9", source:"pap", title:"T3 traversant — Dernier étage avec terrasse", price:210000, surface:68, rooms:3, city:"Lyon 3ème", postal_code:"69003", dpe_letter:"C", score:79, price_gap_percent:-12.7, rental_yield:5.8, score_reasons:["Dernier étage avec terrasse = forte valeur","Prix 12.7% sous marché","DPE C : pas de travaux lourds à prévoir"], url:"#", status:"contacté", scraped_at:"2026-03-20T08:15:00" },
-    { id:"j10", source:"bienici", title:"Duplex T4 — Charme ancien rénové", price:289000, surface:92, rooms:4, city:"Lyon 1er", postal_code:"69001", dpe_letter:"D", score:71, price_gap_percent:-6.5, rental_yield:4.5, score_reasons:["Quartier Croix-Rousse très recherché","Duplex = plus-value à la revente","Légèrement sous marché (-6.5%)"], url:"#", status:"analysé", scraped_at:"2026-03-19T14:30:00" },
-  ]
-};
+let DATA = { stats: { total_listings:0, scored_listings:0, hot_deals:0, avg_score:0, active_sources:0, new_today:0, top_cities:[] }, listings: [] };
+
+async function loadRealData() {
+  try {
+    const resp = await fetch('data/export.json');
+    if (!resp.ok) throw new Error('Fichier non trouvé');
+    const raw = await resp.json();
+
+    // Transformer les listings au format du dashboard
+    const listings = (raw.listings || []).map(l => {
+      let reasons = [];
+      try { reasons = typeof l.ai_reasons === 'string' ? JSON.parse(l.ai_reasons) : (l.ai_reasons || []); } catch(e) {}
+
+      return {
+        id: l.id, source: l.source || 'inconnu', url: l.url || '#',
+        title: l.title || 'Annonce',
+        price: l.price, surface: l.surface, rooms: l.rooms,
+        city: l.city || '', postal_code: l.postal_code || '',
+        dpe_letter: l.dpe_letter,
+        score: l.ai_score || 0,
+        price_gap_percent: l.dvf_price_gap ? -l.dvf_price_gap : null,
+        rental_yield: l.ai_rental_yield || l.rental_yield,
+        score_reasons: reasons,
+        scraped_at: l.created_at,
+        property_type: l.property_type || '',
+      };
+    });
+
+    // Construire les stats
+    const s = raw.stats || {};
+    const sources = Object.keys(s.by_source || {});
+    const cityEntries = Object.entries(s.by_city || {});
+    const topCities = cityEntries.map(([city, count]) => {
+      const cityListings = listings.filter(l => l.city === city);
+      const avg = cityListings.length ? cityListings.reduce((a,l) => a + (l.score||0), 0) / cityListings.length : 0;
+      return { city, count, avg_score: avg };
+    }).sort((a,b) => b.count - a.count).slice(0, 5);
+
+    DATA = {
+      stats: {
+        total_listings: s.total || listings.length,
+        scored_listings: s.scored || listings.filter(l => l.score > 0).length,
+        hot_deals: s.top_deals || listings.filter(l => l.score >= 75).length,
+        avg_score: s.avg_score || 0,
+        active_sources: sources.length,
+        new_today: listings.length,
+        top_cities: topCities,
+      },
+      listings: listings,
+    };
+
+    console.log('Données réelles chargées:', DATA.stats.total_listings, 'annonces');
+  } catch(e) {
+    console.error('Erreur chargement données:', e);
+    DATA.stats = { total_listings:0, scored_listings:0, hot_deals:0, avg_score:0, active_sources:0, new_today:0, top_cities:[] };
+    DATA.listings = [];
+  }
+}
 
 // ===== HELPERS =====
 const fmt = n => n != null ? n.toLocaleString('fr-FR') : '—';
@@ -426,8 +457,9 @@ function renderStats() {
 
 // ===== RENDER BAR CHART =====
 function renderBarChart() {
-  const buckets = [{range:'0-20',count:12,color:'var(--red)'},{range:'21-40',count:28,color:'#f97316'},{range:'41-60',count:67,color:'var(--orange)'},{range:'61-80',count:59,color:'var(--accent)'},{range:'81-100',count:23,color:'var(--green)'}];
-  const max = Math.max(...buckets.map(b=>b.count));
+  const ranges = [{range:'0-20',min:0,max:20,color:'var(--red)'},{range:'21-40',min:21,max:40,color:'#f97316'},{range:'41-60',min:41,max:60,color:'var(--orange)'},{range:'61-80',min:61,max:80,color:'var(--accent)'},{range:'81-100',min:81,max:100,color:'var(--green)'}];
+  const buckets = ranges.map(r => ({...r, count: DATA.listings.filter(l => (l.score||0) >= r.min && (l.score||0) <= r.max).length}));
+  const max = Math.max(...buckets.map(b=>b.count), 1);
   document.getElementById('barChart').innerHTML = buckets.map(b => `
     <div class="bar-col">
       <div class="bar" style="height:${(b.count/max)*140}px;background:${b.color}">
@@ -573,11 +605,14 @@ document.getElementById('scoreSlider').addEventListener('input', e => {
   applyFilters();
 });
 
-renderStats();
-renderBarChart();
-renderCities();
-populateCityFilter();
-applyFilters();
+// Charger les données réelles puis afficher
+loadRealData().then(() => {
+  renderStats();
+  renderBarChart();
+  renderCities();
+  populateCityFilter();
+  applyFilters();
+});
 </script>
 </body>
 </html>
