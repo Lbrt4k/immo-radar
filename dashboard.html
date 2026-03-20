@@ -303,6 +303,9 @@ body::before {
     <div class="header-right">
       <div class="status-dot"></div>
       <span class="status-text">Dernière analyse : <span id="lastUpdate">il y a 2 min</span></span>
+      <button onclick="viewSaved()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;margin-left:16px;font-weight:600" title="Voir annonces sauvegardées">
+        <i class="fas fa-bookmark"></i> <span id="savedCount">0</span>
+      </button>
     </div>
   </div>
 </div>
@@ -420,6 +423,7 @@ async function loadRealData() {
         top_cities: topCities,
       },
       listings: listings,
+      exported_at: raw.exported_at,
     };
 
     console.log('Données réelles chargées:', DATA.stats.total_listings, 'annonces');
@@ -454,6 +458,8 @@ function renderStats() {
     { icon:'fa-fire', cls:'green', value:s.hot_deals, label:'Bonnes affaires', sub:'Score > 75/100', trend:'+6', trendDir:'up' },
     { icon:'fa-bolt', cls:'orange', value:s.active_sources, label:'Sources actives', sub:'PAP + Bien\'ici', trend:null },
   ];
+  const lastUpdateTime = DATA.exported_at ? timeAgo(DATA.exported_at) : 'jamais';
+  document.getElementById('lastUpdate').textContent = lastUpdateTime;
   grid.innerHTML = cards.map((c,i) => `
     <div class="stat-card animate-in delay-${i+1}">
       <div class="stat-icon ${c.cls}"><i class="fas ${c.icon}"></i></div>
@@ -573,10 +579,10 @@ function renderListings(listings) {
             <a href="${l.url}" target="_blank" class="btn btn-primary" onclick="event.stopPropagation()">
               <i class="fas fa-external-link-alt"></i> Voir l'annonce
             </a>
-            <button class="btn btn-ghost" onclick="event.stopPropagation()">
+            <button class="btn btn-ghost" onclick="saveListing(${JSON.stringify(l).replace(/"/g, '&quot;')}, event)">
               <i class="fas fa-bookmark"></i> Sauvegarder
             </button>
-            <button class="btn btn-ghost" onclick="event.stopPropagation()">
+            <button class="btn btn-ghost" onclick="contactListing(${JSON.stringify(l).replace(/"/g, '&quot;')}, event)">
               <i class="fas fa-phone"></i> Contacter
             </button>
           </div>
@@ -618,6 +624,124 @@ function populateCityFilter() {
   cities.forEach(c => { const o = document.createElement('option'); o.value=c; o.textContent=c; select.appendChild(o); });
 }
 
+// ===== FAVORIS & ACTIONS =====
+function getSaved() {
+  try { return JSON.parse(localStorage.getItem('immoradar_saved') || '{}'); } catch(e) { return {}; }
+}
+
+function saveListing(listing, event) {
+  event.stopPropagation();
+  const saved = getSaved();
+  if (saved[listing.id]) {
+    delete saved[listing.id];
+  } else {
+    saved[listing.id] = listing;
+  }
+  localStorage.setItem('immoradar_saved', JSON.stringify(saved));
+  updateSavedCount();
+  alert(saved[listing.id] ? '✅ Annonce sauvegardée' : '❌ Annonce supprimée des favoris');
+}
+
+function updateSavedCount() {
+  const saved = getSaved();
+  document.getElementById('savedCount').textContent = Object.keys(saved).length;
+}
+
+function viewSaved() {
+  const saved = getSaved();
+  const listings = Object.values(saved);
+
+  if (!listings.length) {
+    alert('Aucune annonce sauvegardée');
+    return;
+  }
+
+  // Créer une page modale
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+
+  const content = document.createElement('div');
+  content.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;color:var(--text)';
+
+  content.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="margin:0;font-size:20px">Annonces sauvegardées (${listings.length})</h2>
+      <button onclick="this.closest('div').parentElement.parentElement.remove()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px">✕</button>
+    </div>
+    ${listings.map(l => `
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px">
+        <div style="font-weight:600;color:var(--accent)">${l.title}</div>
+        <div style="font-size:13px;color:var(--text2);margin:6px 0">${fmt(l.price)} € · ${l.surface}m² · ${l.city}</div>
+        <div style="font-size:12px;color:var(--text3)">Score: ${l.score}/100</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <a href="${l.url}" target="_blank" style="flex:1;padding:8px;background:var(--accent);color:white;border-radius:8px;text-align:center;text-decoration:none;font-size:12px;font-weight:600">Voir annonce</a>
+          <button onclick="contactListing(${JSON.stringify(l).replace(/"/g, '&quot;')}, event);this.closest('div').parentElement.parentElement.parentElement.remove()" style="padding:8px 12px;background:var(--green);color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">Contacter</button>
+        </div>
+      </div>
+    `).join('')}
+  `;
+
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+  modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+}
+
+function contactListing(listing, event) {
+  if(event) event.stopPropagation();
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+
+  const form = document.createElement('div');
+  form.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:500px;width:100%;padding:24px;color:var(--text)';
+
+  form.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="margin:0;font-size:18px">Intéressé par cette annonce</h2>
+      <button onclick="this.closest('div').parentElement.parentElement.remove()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px">✕</button>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px">
+      <strong>${listing.title}</strong><br>
+      ${fmt(listing.price)} € · ${listing.surface}m² · ${listing.city}
+    </div>
+    <input type="text" placeholder="Votre nom *" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-family:Inter" required>
+    <input type="email" placeholder="Votre email *" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-family:Inter" required>
+    <input type="tel" placeholder="Votre téléphone (optionnel)" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-family:Inter">
+    <textarea placeholder="Message (optionnel)" style="width:100%;padding:10px;margin-bottom:16px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-family:Inter;resize:vertical" rows="3"></textarea>
+    <button onclick="submitContact(this, ${JSON.stringify(listing).replace(/"/g, '&quot;')})" style="width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px">Envoyer ma demande</button>
+  `;
+
+  modal.appendChild(form);
+  document.body.appendChild(modal);
+  modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+}
+
+function submitContact(btn, listing) {
+  const form = btn.closest('div');
+  const nom = form.querySelector('input[placeholder*="nom"]').value.trim();
+  const email = form.querySelector('input[placeholder*="email"]').value.trim();
+  const tel = form.querySelector('input[placeholder*="téléphone"]').value.trim();
+  const msg = form.querySelector('textarea').value.trim();
+
+  if (!nom || !email) {
+    alert('Veuillez remplir au moins: Nom et Email');
+    return;
+  }
+
+  // Sauvegarder le message en localStorage
+  const contacts = JSON.parse(localStorage.getItem('immoradar_contacts') || '[]');
+  contacts.push({
+    listing_id: listing.id,
+    listing_title: listing.title,
+    nom, email, tel, msg,
+    date: new Date().toLocaleString('fr-FR')
+  });
+  localStorage.setItem('immoradar_contacts', JSON.stringify(contacts));
+
+  alert('✅ Demande enregistrée! Vous pouvez maintenant contacter directement depuis l\'annonce.');
+  form.parentElement.parentElement.remove();
+}
+
 // ===== INIT =====
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 document.getElementById('filterCity').addEventListener('change', applyFilters);
@@ -635,6 +759,7 @@ loadRealData().then(() => {
   renderCities();
   populateCityFilter();
   applyFilters();
+  updateSavedCount();
 });
 </script>
 </body>
