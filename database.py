@@ -44,6 +44,7 @@ def init_db():
             ai_recommendation TEXT,
             ai_estimated_value REAL,
             ai_rental_yield REAL,
+            ai_investor_analysis TEXT,
             alert_sent INTEGER DEFAULT 0,
             raw_data TEXT,
             created_at TEXT DEFAULT (datetime('now')),
@@ -58,6 +59,12 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_listings_city ON listings(city);
         CREATE INDEX IF NOT EXISTS idx_listings_source ON listings(source);
     """)
+    # Ajouter colonne si elle n'existe pas (migration)
+    try:
+        conn.execute("ALTER TABLE listings ADD COLUMN ai_investor_analysis TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # Colonne existe déjà
     conn.close()
     logger.info(f"Base de données initialisée: {DB_PATH}")
 
@@ -126,6 +133,7 @@ def update_listing_score(listing_id, score_data):
             UPDATE listings SET
                 ai_score=?, ai_reasons=?, ai_recommendation=?,
                 ai_estimated_value=?, ai_rental_yield=?,
+                ai_investor_analysis=?,
                 updated_at=datetime('now')
             WHERE id=?
         """, (
@@ -134,6 +142,7 @@ def update_listing_score(listing_id, score_data):
             score_data.get("recommendation"),
             score_data.get("estimated_value"),
             score_data.get("rental_yield"),
+            json.dumps(score_data.get("investor_analysis", {}), ensure_ascii=False),
             listing_id,
         ))
         conn.commit()

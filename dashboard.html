@@ -233,8 +233,13 @@ body::before {
 .listing-card.open .listing-details { max-height:400px; }
 .details-inner { padding-top:16px; margin-top:16px; border-top:1px solid var(--border); }
 .reasons { margin-bottom:14px; }
+.investor-section { margin-bottom:14px; }
 .reason-title { font-size:12px; font-weight:600; color:var(--text2); margin-bottom:8px; }
 .reason { font-size:13px; color:var(--text); padding:6px 0 6px 14px; border-left:2px solid var(--accent); margin-bottom:4px; }
+.investor-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px; }
+.investor-item { background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.15); border-radius:8px; padding:8px 10px; }
+.inv-label { font-size:11px; color:var(--text2); display:block; margin-bottom:4px; }
+.inv-value { font-size:12px; font-weight:600; color:var(--text); }
 .listing-actions { display:flex; gap:10px; }
 .btn {
   display:inline-flex; align-items:center; gap:6px;
@@ -375,6 +380,9 @@ async function loadRealData() {
       let reasons = [];
       try { reasons = typeof l.ai_reasons === 'string' ? JSON.parse(l.ai_reasons) : (l.ai_reasons || []); } catch(e) {}
 
+      let investor = {};
+      try { investor = typeof l.ai_investor_analysis === 'string' ? JSON.parse(l.ai_investor_analysis) : (l.ai_investor_analysis || {}); } catch(e) {}
+
       return {
         id: l.id, source: l.source || 'inconnu', url: l.url || '#',
         title: l.title || 'Annonce',
@@ -385,6 +393,7 @@ async function loadRealData() {
         price_gap_percent: l.dvf_price_gap ? -l.dvf_price_gap : null,
         rental_yield: l.ai_rental_yield || l.rental_yield,
         score_reasons: reasons,
+        investor_analysis: investor,
         scraped_at: l.created_at,
         property_type: l.property_type || '',
       };
@@ -544,6 +553,20 @@ function renderListings(listings) {
             <div class="reasons">
               <div class="reason-title"><i class="fas fa-lightbulb" style="color:var(--orange);margin-right:4px"></i> Analyse IA</div>
               ${reasons.map(r => `<div class="reason">${r}</div>`).join('')}
+            </div>
+          ` : ''}
+          ${l.investor_analysis && Object.keys(l.investor_analysis).length ? `
+            <div class="investor-section">
+              <div class="reason-title"><i class="fas fa-chart-line" style="color:var(--accent);margin-right:4px"></i> Analyse Investisseur</div>
+              <div class="investor-grid">
+                ${l.investor_analysis.estimated_taxes_annual ? `<div class="investor-item"><span class="inv-label">💰 Impôts estimés</span><span class="inv-value">${l.investor_analysis.estimated_taxes_annual}</span></div>` : ''}
+                ${l.investor_analysis.estimated_syndic_fees_annual ? `<div class="investor-item"><span class="inv-label">🏢 Frais syndic</span><span class="inv-value">${l.investor_analysis.estimated_syndic_fees_annual}</span></div>` : ''}
+                ${l.investor_analysis.heating_type ? `<div class="investor-item"><span class="inv-label">🔥 Chauffage</span><span class="inv-value">${l.investor_analysis.heating_type}</span></div>` : ''}
+                ${l.investor_analysis.estimated_charges_annual ? `<div class="investor-item"><span class="inv-label">📊 Charges annuelles</span><span class="inv-value">${l.investor_analysis.estimated_charges_annual}</span></div>` : ''}
+                ${l.investor_analysis.recommended_credit_rate ? `<div class="investor-item"><span class="inv-label">📈 Taux crédit</span><span class="inv-value">${l.investor_analysis.recommended_credit_rate}</span></div>` : ''}
+                ${l.investor_analysis.estimated_notary_fees ? `<div class="investor-item"><span class="inv-label">📋 Notaire</span><span class="inv-value">${l.investor_analysis.estimated_notary_fees}</span></div>` : ''}
+                ${l.investor_analysis.blank_operation_feasible !== undefined ? `<div class="investor-item"><span class="inv-label">✅ Op. Blanche</span><span class="inv-value">${l.investor_analysis.blank_operation_feasible ? 'Oui' : 'Non'}</span></span></div>` : ''}
+              </div>
             </div>
           ` : ''}
           <div class="listing-actions">

@@ -1,0 +1,101 @@
+18:26:26 [immo_radar] INFO: ============================================================
+18:26:26 [immo_radar] INFO: IMMO RADAR — 20/03/2026 18:26
+18:26:26 [immo_radar] INFO: ============================================================
+18:26:27 [immo_radar] INFO: ==================================================
+SCRAPING PAP.FR
+==================================================
+18:26:27 [immo_radar.pap] INFO: PAP: appartement à Lyon...
+18:26:30 [immo_radar.pap] INFO: PAP: maison à Lyon...
+18:26:34 [immo_radar.pap] INFO: PAP: appartement à Marseille...
+18:26:38 [immo_radar.pap] INFO: PAP: maison à Marseille...
+18:26:43 [immo_radar.pap] INFO: PAP: 0 nouvelles sur 0
+18:26:43 [immo_radar] INFO: ==================================================
+SCRAPING BIEN'ICI
+==================================================
+18:26:43 [immo_radar.bienici] INFO: Bienici: Lyon...
+18:26:47 [immo_radar.bienici] INFO: Bienici: Marseille...
+18:26:51 [immo_radar.bienici] INFO: Bienici: 0 nouvelles sur 0
+18:26:51 [immo_radar] INFO: TOTAL: 0 nouvelles annonces
+18:26:51 [immo_radar] INFO: ==================================================
+ENRICHISSEMENT DVF
+==================================================
+18:26:51 [immo_radar.dvf] INFO: DVF: 0 annonces à enrichir
+18:26:51 [immo_radar] INFO: ==================================================
+ENRICHISSEMENT DPE
+==================================================
+18:26:51 [immo_radar.dpe] INFO: DPE: 0 annonces à enrichir
+18:26:52 [immo_radar] INFO: ==================================================
+SCORING IA
+==================================================
+18:26:52 [immo_radar.scorer] INFO: Scoring: 0 annonces
+18:26:52 [immo_radar.scorer] INFO: Scoring: 0/0 scorées
+18:26:52 [immo_radar] INFO: ==================================================
+ALERTES
+==================================================
+18:26:52 [immo_radar.alerts] INFO: Telegram: aucune nouvelle alerte
+18:26:52 [immo_radar] INFO: ==================================================
+EXPORT DASHBOARD
+==================================================
+18:26:52 [immo_radar] INFO: Export: /Users/leobrettes/Desktop/immo-radar/data/export.json
+18:26:52 [immo_radar] INFO: 
+Pipeline terminé en 25.6s — 0 nouvelles annonces
+18:26:52 [immo_radar] INFO: Base: 0 annonces | 0 scorées | 0 bonnes affaires | Score moyen: 0/100
+18:27:27 [immo_radar] INFO: ==================================================
+SCRAPING PAP.FR
+==================================================
+18:27:27 [immo_radar.pap] INFO: PAP: appartement à Lyon...
+18:27:29 [urllib3.connectionpool] DEBUG: Starting new HTTPS connection (1): www.pap.fr:443
+18:27:30 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-lyon-g69123?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 301 None
+18:27:31 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 200 None
+18:27:31 [immo_radar.pap] INFO: PAP: maison à Lyon...
+18:27:33 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-lyon-g69123?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 301 None
+18:27:34 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 200 None
+18:27:34 [immo_radar.pap] INFO: PAP: appartement à Marseille...
+18:27:36 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-marseille-g13055?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 301 None
+18:27:38 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-ternant-17400-g13055?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 200 None
+18:27:38 [immo_radar.pap] INFO: PAP: maison à Marseille...
+18:27:40 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-marseille-g13055?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 301 None
+18:27:42 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-ternant-17400-g13055?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 200 None
+18:27:42 [immo_radar.pap] INFO: PAP: 0 nouvelles sur 0
+18:27:42 [immo_radar] INFO: ==================================================
+SCRAPING BIEN'ICI
+==================================================
+18:27:42 [immo_radar.bienici] INFO: Bienici: Lyon...
+18:27:44 [urllib3.connectionpool] DEBUG: Starting new HTTPS connection (1): www.bienici.com:443
+18:27:44 [urllib3.connectionpool] DEBUG: https://www.bienici.com:443 "POST /realEstateAds.json HTTP/1.1" 404 None
+18:27:47 [urllib3.connectionpool] DEBUG: https://www.bienici.com:443 "GET /recherche/achat/lyon-69123?prix-max=300000&page=1 HTTP/1.1" 200 None
+18:27:47 [immo_radar.bienici] INFO: Bienici: Marseille...
+18:27:49 [urllib3.connectionpool] DEBUG: https://www.bienici.com:443 "POST /realEstateAds.json HTTP/1.1" 404 29
+18:27:51 [urllib3.connectionpool] DEBUG: https://www.bienici.com:443 "GET /recherche/achat/marseille-13055?prix-max=300000&page=1 HTTP/1.1" 200 None
+18:27:51 [immo_radar.bienici] INFO: Bienici: 0 nouvelles sur 0
+18:27:51 [immo_radar] INFO: TOTAL: 0 nouvelles annonces
+18:36:45 [immo_radar] INFO: ==================================================
+SCRAPING PAP.FR
+==================================================
+18:36:45 [immo_radar.pap] INFO: PAP: appartement à Lyon...
+18:36:47 [urllib3.connectionpool] DEBUG: Starting new HTTPS connection (1): www.pap.fr:443
+18:36:48 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-lyon-g69123?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 403 None
+18:36:48 [immo_radar.pap] ERROR: PAP erreur: 403 Client Error: Forbidden for url: https://www.pap.fr/annonce/vente-immobiliere-lyon-g69123?prix-min=50000&prix-max=300000&surface-min=20
+18:36:48 [immo_radar.pap] INFO: PAP: maison à Lyon...
+18:36:50 [urllib3.connectionpool] DEBUG: Resetting dropped connection: www.pap.fr
+18:36:50 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-lyon-g69123?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 301 None
+18:36:51 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 200 None
+18:36:51 [immo_radar.pap] INFO: PAP: appartement à Marseille...
+18:36:53 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-marseille-g13055?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 301 None
+18:36:55 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-ternant-17400-g13055?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 200 None
+18:36:55 [immo_radar.pap] INFO: PAP: maison à Marseille...
+18:36:58 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-marseille-g13055?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 301 None
+18:37:00 [urllib3.connectionpool] DEBUG: https://www.pap.fr:443 "GET /annonce/vente-immobiliere-ternant-17400-g13055?prix-min=50000&prix-max=300000&surface-min=20 HTTP/1.1" 200 None
+18:37:00 [immo_radar.pap] INFO: PAP: 0 nouvelles sur 0
+18:37:00 [immo_radar] INFO: ==================================================
+SCRAPING BIEN'ICI
+==================================================
+18:37:00 [immo_radar.bienici] INFO: Bienici: Lyon...
+18:37:02 [urllib3.connectionpool] DEBUG: Starting new HTTPS connection (1): www.bienici.com:443
+18:37:02 [urllib3.connectionpool] DEBUG: https://www.bienici.com:443 "POST /realEstateAds.json HTTP/1.1" 404 29
+18:37:04 [urllib3.connectionpool] DEBUG: https://www.bienici.com:443 "GET /recherche/achat/lyon-69123?prix-max=300000&page=1 HTTP/1.1" 200 None
+18:37:04 [immo_radar.bienici] INFO: Bienici: Marseille...
+18:37:06 [urllib3.connectionpool] DEBUG: https://www.bienici.com:443 "POST /realEstateAds.json HTTP/1.1" 404 29
+18:37:08 [urllib3.connectionpool] DEBUG: https://www.bienici.com:443 "GET /recherche/achat/marseille-13055?prix-max=300000&page=1 HTTP/1.1" 200 None
+18:37:08 [immo_radar.bienici] INFO: Bienici: 0 nouvelles sur 0
+18:37:08 [immo_radar] INFO: TOTAL: 0 nouvelles annonces
