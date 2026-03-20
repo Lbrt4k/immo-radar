@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImmoRadar — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #060b18;
+  --bg2: #0c1425;
+  --card: #111c32;
+  --card-hover: #162240;
+  --accent: #3b82f6;
+  --accent2: #6366f1;
+  --green: #10b981;
+  --green-dark: #059669;
+  --orange: #f59e0b;
+  --red: #ef4444;
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --text3: #475569;
+  --border: #1e2d4a;
+  --glow: rgba(59,130,246,0.15);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+/* Animated gradient background */
+body::before {
+  content:''; position:fixed; top:-50%; left:-50%; width:200%; height:200%;
+  background: radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(99,102,241,0.05) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(16,185,129,0.04) 0%, transparent 50%);
+  animation: bgMove 20s ease-in-out infinite;
+  z-index:0;
+}
+@keyframes bgMove { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-2%,-2%)} }
+
+.app { position:relative; z-index:1; }
+
+/* Header */
+.header {
+  background: linear-gradient(180deg, rgba(17,28,50,0.95) 0%, rgba(6,11,24,0.8) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  max-width:1440px; margin:0 auto; padding:0 32px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.logo { display:flex; align-items:center; gap:12px; }
+.logo-icon {
+  width:40px; height:40px; border-radius:12px;
+  background: linear-gradient(135deg, var(--accent), var(--green));
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 0 20px rgba(59,130,246,0.3);
+}
+.logo-icon i { color:#fff; font-size:18px; }
+.logo-text { font-size:22px; font-weight:800; background:linear-gradient(135deg, var(--accent), var(--green)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.logo-badge { font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; background:rgba(16,185,129,0.15); color:var(--green); margin-left:4px; }
+.header-right { display:flex; align-items:center; gap:12px; }
+.status-dot { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,0.4)} 50%{opacity:0.8;box-shadow:0 0 0 8px rgba(16,185,129,0)} }
+.status-text { font-size:12px; color:var(--text2); }
+
+.container { max-width:1440px; margin:0 auto; padding:24px 32px; }
+
+/* Stats Grid */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius:16px; padding:20px 24px;
+  transition: all 0.3s;
+  position:relative; overflow:hidden;
+}
+.stat-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+.stat-card::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity:0; transition:opacity 0.3s;
+}
+.stat-card:hover::after { opacity:1; }
+.stat-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; font-size:16px; }
+.stat-icon.blue { background:rgba(59,130,246,0.15); color:var(--accent); }
+.stat-icon.green { background:rgba(16,185,129,0.15); color:var(--green); }
+.stat-icon.orange { background:rgba(245,158,11,0.15); color:var(--orange); }
+.stat-icon.purple { background:rgba(99,102,241,0.15); color:var(--accent2); }
+.stat-value { font-size:32px; font-weight:800; line-height:1; margin-bottom:4px; }
+.stat-label { font-size:13px; color:var(--text2); font-weight:500; }
+.stat-sub { font-size:11px; color:var(--text3); margin-top:6px; }
+.stat-trend { display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; }
+.stat-trend.up { background:rgba(16,185,129,0.15); color:var(--green); }
+.stat-trend.down { background:rgba(239,68,68,0.15); color:var(--red); }
+
+/* Charts Section */
+.charts-row { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:28px; }
+@media(max-width:900px) { .charts-row { grid-template-columns:1fr; } }
+.chart-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:24px;
+}
+.chart-title { font-size:14px; font-weight:600; color:var(--text2); margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+.chart-title i { font-size:14px; opacity:0.6; }
+
+/* Bar chart (CSS only) */
+.bar-chart { display:flex; align-items:flex-end; gap:12px; height:160px; padding-top:10px; }
+.bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.bar {
+  width:100%; border-radius:8px 8px 4px 4px; min-height:4px;
+  transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative; cursor:pointer;
+}
+.bar:hover { filter:brightness(1.2); transform:scaleY(1.05); transform-origin:bottom; }
+.bar-label { font-size:11px; color:var(--text3); font-weight:500; }
+.bar-value { font-size:11px; color:var(--text2); font-weight:600; position:absolute; top:-18px; left:50%; transform:translateX(-50%); opacity:0; transition:opacity 0.2s; }
+.bar:hover .bar-value { opacity:1; }
+
+/* City list */
+.city-list { display:flex; flex-direction:column; }
+.city-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 0; border-bottom:1px solid var(--border);
+  transition:all 0.2s; cursor:pointer;
+}
+.city-row:last-child { border:none; }
+.city-row:hover { padding-left:8px; }
+.city-name { font-size:14px; font-weight:500; display:flex; align-items:center; gap:8px; }
+.city-rank { width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; background:var(--border); }
+.city-stats { display:flex; align-items:center; gap:16px; }
+.city-count { font-size:12px; color:var(--text3); }
+.city-score { font-size:13px; font-weight:700; padding:2px 8px; border-radius:6px; }
+
+/* Filters */
+.filters-bar {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:16px 20px;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.search-box {
+  flex:1 1 220px; position:relative;
+}
+.search-box i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:14px; }
+.search-box input {
+  width:100%; padding:10px 12px 10px 36px; border-radius:10px;
+  border:1px solid var(--border); background:var(--bg2);
+  color:var(--text); font-size:13px; font-family:'Inter',sans-serif;
+  outline:none; transition:border-color 0.2s;
+}
+.search-box input:focus { border-color:var(--accent); }
+.search-box input::placeholder { color:var(--text3); }
+
+.filter-select {
+  padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+  background:var(--bg2); color:var(--text); font-size:13px;
+  font-family:'Inter',sans-serif; cursor:pointer; outline:none;
+  transition:border-color 0.2s; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center;
+  padding-right:30px;
+}
+.filter-select:focus { border-color:var(--accent); }
+
+.score-slider { display:flex; align-items:center; gap:8px; }
+.score-slider label { font-size:12px; color:var(--text3); white-space:nowrap; }
+.score-slider input[type=range] { width:80px; accent-color:var(--accent); }
+.score-slider .score-val { font-size:13px; font-weight:700; color:var(--accent); min-width:24px; }
+
+.results-count { font-size:13px; color:var(--text3); margin-bottom:12px; padding-left:4px; }
+
+/* Listing Cards */
+.listings-grid { display:flex; flex-direction:column; gap:8px; }
+
+.listing-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:20px 24px;
+  cursor:pointer; transition:all 0.25s;
+  position:relative; overflow:hidden;
+}
+.listing-card:hover { border-color:rgba(59,130,246,0.3); background:var(--card-hover); }
+.listing-card.hot { border-color:rgba(16,185,129,0.3); }
+.listing-card.hot::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg, var(--green), var(--accent));
+}
+
+.listing-top { display:flex; align-items:flex-start; gap:16px; }
+
+.score-badge {
+  width:60px; height:60px; border-radius:14px; display:flex;
+  flex-direction:column; align-items:center; justify-content:center;
+  flex-shrink:0; border:2px solid;
+}
+.score-badge .score-num { font-size:22px; font-weight:900; line-height:1; }
+.score-badge .score-of { font-size:9px; color:var(--text3); }
+
+.listing-content { flex:1; min-width:0; }
+.listing-header { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+.listing-title { font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:500px; }
+.tag { font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px; }
+.tag-pap { background:rgba(124,58,237,0.15); color:#a78bfa; }
+.tag-bienici { background:rgba(14,165,233,0.15); color:#67e8f9; }
+.tag-seloger { background:rgba(234,88,12,0.15); color:#fb923c; }
+.tag-leboncoin { background:rgba(245,158,11,0.15); color:#fbbf24; }
+.tag-dpe { font-weight:800; border-radius:6px; }
+
+.listing-metrics { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.metric { display:flex; align-items:center; gap:4px; font-size:13px; }
+.metric i { font-size:12px; }
+.metric-price { font-size:18px; font-weight:800; color:var(--accent); }
+.metric-details { color:var(--text2); }
+.metric-priceSqm { font-size:12px; color:var(--text3); }
+.metric-gap { font-weight:700; display:flex; align-items:center; gap:4px; }
+.metric-gap.under { color:var(--green); }
+.metric-gap.over { color:var(--red); }
+.metric-yield { font-size:12px; }
+.metric-yield.high { color:var(--green); font-weight:600; }
+.listing-time { font-size:11px; color:var(--text3); margin-top:6px; }
+
+.listing-expand { flex-shrink:0; padding-top:8px; color:var(--text3); transition:transform 0.2s; }
+.listing-card.open .listing-expand { transform:rotate(180deg); }
+
+/* Expanded details */
+.listing-details {
+  max-height:0; overflow:hidden; transition:max-height 0.4s ease;
+}
+.listing-card.open .listing-details { max-height:400px; }
+.details-inner { padding-top:16px; margin-top:16px; border-top:1px solid var(--border); }
+.reasons { margin-bottom:14px; }
+.reason-title { font-size:12px; font-weight:600; color:var(--text2); margin-bottom:8px; }
+.reason { font-size:13px; color:var(--text); padding:6px 0 6px 14px; border-left:2px solid var(--accent); margin-bottom:4px; }
+.listing-actions { display:flex; gap:10px; }
+.btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 18px; border-radius:10px; font-size:13px;
+  font-weight:600; font-family:'Inter',sans-serif;
+  border:none; cursor:pointer; transition:all 0.2s;
+  text-decoration:none;
+}
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { background:#2563eb; box-shadow:0 4px 16px rgba(59,130,246,0.3); }
+.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--text2); }
+.btn-ghost:hover { border-color:var(--text2); color:var(--text); }
+
+/* Empty state */
+.empty-state {
+  text-align:center; padding:80px 20px;
+  background:var(--card); border-radius:16px; border:1px solid var(--border);
+}
+.empty-state i { font-size:48px; color:var(--text3); margin-bottom:16px; }
+.empty-state p { color:var(--text2); font-size:15px; }
+.empty-state small { color:var(--text3); font-size:13px; }
+
+/* Footer */
+.footer { text-align:center; padding:32px 0 20px; color:var(--text3); font-size:12px; }
+
+/* Responsive */
+@media(max-width:768px) {
+  .container { padding:16px; }
+  .header-inner { padding:0 16px; }
+  .stats-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .listing-title { max-width:200px; }
+  .listing-metrics { gap:10px; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--text3); }
+
+/* Animations */
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.animate-in { animation:fadeUp 0.5s ease forwards; }
+.delay-1 { animation-delay:0.1s; opacity:0; }
+.delay-2 { animation-delay:0.2s; opacity:0; }
+.delay-3 { animation-delay:0.3s; opacity:0; }
+.delay-4 { animation-delay:0.4s; opacity:0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon"><i class="fas fa-radar" style="font-size:16px"></i><i class="fas fa-house" style="font-size:16px"></i></div>
+      <span class="logo-text">ImmoRadar</span>
+      <span class="logo-badge">V1.0</span>
+    </div>
+    <div class="header-right">
+      <div class="status-dot"></div>
+      <span class="status-text">Dernière analyse : <span id="lastUpdate">il y a 2 min</span></span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- STATS -->
+<div class="stats-grid" id="statsGrid"></div>
+
+<!-- CHARTS -->
+<div class="charts-row">
+  <div class="chart-card animate-in delay-2">
+    <div class="chart-title"><i class="fas fa-chart-bar"></i> Distribution des scores</div>
+    <div class="bar-chart" id="barChart"></div>
+  </div>
+  <div class="chart-card animate-in delay-3">
+    <div class="chart-title"><i class="fas fa-city"></i> Top villes</div>
+    <div class="city-list" id="cityList"></div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar animate-in delay-3">
+  <div class="search-box">
+    <i class="fas fa-search"></i>
+    <input type="text" id="searchInput" placeholder="Rechercher ville, titre, code postal...">
+  </div>
+  <select class="filter-select" id="filterCity">
+    <option value="all">Toutes les villes</option>
+  </select>
+  <select class="filter-select" id="filterSource">
+    <option value="all">Toutes sources</option>
+    <option value="pap">PAP</option>
+    <option value="bienici">Bien'ici</option>
+    <option value="seloger">SeLoger</option>
+    <option value="leboncoin">LeBonCoin</option>
+  </select>
+  <select class="filter-select" id="sortBy">
+    <option value="score">Tri : Score</option>
+    <option value="price_asc">Tri : Prix croissant</option>
+    <option value="price_desc">Tri : Prix décroissant</option>
+    <option value="gap">Tri : Écart marché</option>
+    <option value="yield">Tri : Rendement</option>
+    <option value="date">Tri : Plus récent</option>
+  </select>
+  <div class="score-slider">
+    <label>Score min :</label>
+    <input type="range" min="0" max="100" step="5" value="0" id="scoreSlider">
+    <span class="score-val" id="scoreVal">0</span>
+  </div>
+</div>
+
+<div class="results-count" id="resultsCount"></div>
+
+<!-- LISTINGS -->
+<div class="listings-grid" id="listingsGrid"></div>
+
+<div class="footer">ImmoRadar V1.0 — Moteur IA de détection de bonnes affaires immobilières</div>
+
+</div>
+</div>
+
+<script>
+// ===== DATA =====
+// En production, charger depuis data/export.json :
+// fetch('data/export.json').then(r=>r.json()).then(data => init(data))
+const DATA = {
+  stats: {
+    total_listings: 247, scored_listings: 189, hot_deals: 23, avg_score: 58.4,
+    active_sources: 2, new_today: 34,
+    top_cities: [
+      { city:"Lyon", count:89, avg_score:62.1 },
+      { city:"Marseille", count:78, avg_score:55.8 },
+      { city:"Villeurbanne", count:42, avg_score:59.3 },
+      { city:"Aix-en-Provence", count:38, avg_score:51.2 },
+      { city:"Saint-Étienne", count:31, avg_score:64.7 },
+    ]
+  },
+  listings: [
+    { id:"a1", source:"pap", title:"Appartement T3 lumineux — Vue dégagée, proche métro", price:185000, surface:72, rooms:3, city:"Lyon 3ème", postal_code:"69003", dpe_letter:"D", score:92, price_gap_percent:-18.5, rental_yield:7.2, score_reasons:["Prix 18.5% sous le marché DVF (45 transactions)","Rentabilité brute estimée > 7%","Signal détecté : vente urgente succession"], url:"#", status:"nouveau", scraped_at:"2026-03-20T14:30:00" },
+    { id:"b2", source:"bienici", title:"Maison 5 pièces avec jardin — Quartier calme", price:275000, surface:110, rooms:5, city:"Villeurbanne", postal_code:"69100", dpe_letter:"E", score:87, price_gap_percent:-14.2, rental_yield:6.1, score_reasons:["DPE E : potentiel rénovation +18% de valeur","Prix sous marché de 14.2%","Quartier Gratte-Ciel en hausse constante"], url:"#", status:"nouveau", scraped_at:"2026-03-20T13:15:00" },
+    { id:"c3", source:"pap", title:"Studio idéal investissement locatif — Meublé", price:78000, surface:25, rooms:1, city:"Marseille 5ème", postal_code:"13005", dpe_letter:"F", score:84, price_gap_percent:-22.1, rental_yield:9.8, score_reasons:["Rendement brut exceptionnel 9.8%","DPE F : +18% de valeur après rénovation (coût ~500€/m²)","Quartier proche fac, forte demande locative"], url:"#", status:"nouveau", scraped_at:"2026-03-20T12:00:00" },
+    { id:"d4", source:"bienici", title:"T2 rénové centre-ville Jean Macé", price:142000, surface:45, rooms:2, city:"Lyon 7ème", postal_code:"69007", dpe_letter:"C", score:76, price_gap_percent:-8.3, rental_yield:5.4, score_reasons:["Bon rapport qualité-prix pour le quartier","DPE C correct, pas de travaux énergie","Quartier Jean Macé très dynamique"], url:"#", status:"analysé", scraped_at:"2026-03-20T11:30:00" },
+    { id:"e5", source:"pap", title:"Grand T4 à rénover — Potentiel énorme", price:195000, surface:95, rooms:4, city:"Marseille 6ème", postal_code:"13006", dpe_letter:"G", score:81, price_gap_percent:-25.4, rental_yield:5.9, score_reasons:["Prix -25% vs marché : très sous-évalué","DPE G : potentiel rénovation +25% de valeur","Quartier Castellane premium en hausse"], url:"#", status:"nouveau", scraped_at:"2026-03-19T18:00:00" },
+    { id:"f6", source:"bienici", title:"Appartement T2 avec balcon sud", price:165000, surface:48, rooms:2, city:"Lyon 8ème", postal_code:"69008", dpe_letter:"B", score:62, price_gap_percent:-3.1, rental_yield:4.2, score_reasons:["DPE B excellent, aucun travaux nécessaire","Légèrement sous le marché (-3%)","Pas de signal d'urgence particulier"], url:"#", status:"analysé", scraped_at:"2026-03-19T16:00:00" },
+    { id:"g7", source:"pap", title:"Studio meublé — Idéal étudiant", price:65000, surface:18, rooms:1, city:"Saint-Étienne", postal_code:"42000", dpe_letter:"E", score:88, price_gap_percent:-30.2, rental_yield:11.2, score_reasons:["Rendement brut > 11% — exceptionnel","Prix -30% vs marché (ville en hausse)","Forte demande étudiante, location garantie"], url:"#", status:"nouveau", scraped_at:"2026-03-20T09:00:00" },
+    { id:"h8", source:"bienici", title:"Maison T3 avec garage — Rénovée", price:220000, surface:85, rooms:3, city:"Aix-en-Provence", postal_code:"13100", dpe_letter:"D", score:55, price_gap_percent:2.3, rental_yield:3.8, score_reasons:["Prix au niveau du marché (+2.3%)","Rendement moyen pour la zone","Quartier stable mais pas de signal"], url:"#", status:"archivé", scraped_at:"2026-03-19T10:00:00" },
+    { id:"i9", source:"pap", title:"T3 traversant — Dernier étage avec terrasse", price:210000, surface:68, rooms:3, city:"Lyon 3ème", postal_code:"69003", dpe_letter:"C", score:79, price_gap_percent:-12.7, rental_yield:5.8, score_reasons:["Dernier étage avec terrasse = forte valeur","Prix 12.7% sous marché","DPE C : pas de travaux lourds à prévoir"], url:"#", status:"contacté", scraped_at:"2026-03-20T08:15:00" },
+    { id:"j10", source:"bienici", title:"Duplex T4 — Charme ancien rénové", price:289000, surface:92, rooms:4, city:"Lyon 1er", postal_code:"69001", dpe_letter:"D", score:71, price_gap_percent:-6.5, rental_yield:4.5, score_reasons:["Quartier Croix-Rousse très recherché","Duplex = plus-value à la revente","Légèrement sous marché (-6.5%)"], url:"#", status:"analysé", scraped_at:"2026-03-19T14:30:00" },
+  ]
+};
+
+// ===== HELPERS =====
+const fmt = n => n != null ? n.toLocaleString('fr-FR') : '—';
+const scoreColor = s => s >= 80 ? 'var(--green)' : s >= 60 ? 'var(--orange)' : 'var(--red)';
+const scoreBg = s => s >= 80 ? 'rgba(16,185,129,0.12)' : s >= 60 ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)';
+const DPE_COLORS = {A:'#319834',B:'#33cc31',C:'#cbfc34',D:'#fcfc02',E:'#fccc06',F:'#fc9935',G:'#fc1a22'};
+
+function timeAgo(d) {
+  if (!d) return '';
+  const mins = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+  if (mins < 60) return `il y a ${mins} min`;
+  if (mins < 1440) return `il y a ${Math.floor(mins/60)}h`;
+  return `il y a ${Math.floor(mins/1440)}j`;
+}
+
+// ===== RENDER STATS =====
+function renderStats() {
+  const s = DATA.stats;
+  const grid = document.getElementById('statsGrid');
+  const cards = [
+    { icon:'fa-house', cls:'blue', value:s.total_listings, label:'Annonces totales', sub:`+${s.new_today} aujourd'hui`, trend:'+14%', trendDir:'up' },
+    { icon:'fa-brain', cls:'purple', value:s.scored_listings, label:'Analysées par IA', sub:`Score moyen : ${s.avg_score}`, trend:null },
+    { icon:'fa-fire', cls:'green', value:s.hot_deals, label:'Bonnes affaires', sub:'Score > 75/100', trend:'+6', trendDir:'up' },
+    { icon:'fa-bolt', cls:'orange', value:s.active_sources, label:'Sources actives', sub:'PAP + Bien\'ici', trend:null },
+  ];
+  grid.innerHTML = cards.map((c,i) => `
+    <div class="stat-card animate-in delay-${i+1}">
+      <div class="stat-icon ${c.cls}"><i class="fas ${c.icon}"></i></div>
+      <div class="stat-value">${c.value}</div>
+      <div class="stat-label">${c.label}</div>
+      <div class="stat-sub">${c.sub} ${c.trend ? `<span class="stat-trend ${c.trendDir}">${c.trend}</span>` : ''}</div>
+    </div>
+  `).join('');
+}
+
+// ===== RENDER BAR CHART =====
+function renderBarChart() {
+  const buckets = [{range:'0-20',count:12,color:'var(--red)'},{range:'21-40',count:28,color:'#f97316'},{range:'41-60',count:67,color:'var(--orange)'},{range:'61-80',count:59,color:'var(--accent)'},{range:'81-100',count:23,color:'var(--green)'}];
+  const max = Math.max(...buckets.map(b=>b.count));
+  document.getElementById('barChart').innerHTML = buckets.map(b => `
+    <div class="bar-col">
+      <div class="bar" style="height:${(b.count/max)*140}px;background:${b.color}">
+        <span class="bar-value">${b.count}</span>
+      </div>
+      <span class="bar-label">${b.range}</span>
+    </div>
+  `).join('');
+}
+
+// ===== RENDER CITIES =====
+function renderCities() {
+  const cities = DATA.stats.top_cities;
+  document.getElementById('cityList').innerHTML = cities.map((c,i) => `
+    <div class="city-row" onclick="document.getElementById('filterCity').value='${c.city}';applyFilters()">
+      <div class="city-name">
+        <span class="city-rank">${i+1}</span>
+        ${c.city}
+      </div>
+      <div class="city-stats">
+        <span class="city-count">${c.count} annonces</span>
+        <span class="city-score" style="background:${scoreBg(c.avg_score)};color:${scoreColor(c.avg_score)}">${c.avg_score.toFixed(0)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== RENDER LISTINGS =====
+function renderListings(listings) {
+  document.getElementById('resultsCount').textContent = `${listings.length} annonce${listings.length>1?'s':''} trouvée${listings.length>1?'s':''}`;
+
+  if (!listings.length) {
+    document.getElementById('listingsGrid').innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-search"></i>
+        <p>Aucune annonce ne correspond aux filtres</p>
+        <small>Ajuste les critères de recherche</small>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('listingsGrid').innerHTML = listings.map(l => {
+    const priceSqm = l.surface ? Math.round(l.price/l.surface) : null;
+    const reasons = Array.isArray(l.score_reasons) ? l.score_reasons : [];
+    const isHot = l.score >= 80;
+    const sourceTag = `tag-${l.source}`;
+
+    return `
+    <div class="listing-card ${isHot?'hot':''}" onclick="this.classList.toggle('open')">
+      <div class="listing-top">
+        <div class="score-badge" style="border-color:${scoreColor(l.score)};background:${scoreBg(l.score)}">
+          <span class="score-num" style="color:${scoreColor(l.score)}">${l.score||'—'}</span>
+          <span class="score-of">/100</span>
+        </div>
+        <div class="listing-content">
+          <div class="listing-header">
+            <span class="listing-title">${l.title}</span>
+            <span class="tag ${sourceTag}">${l.source}</span>
+            ${l.dpe_letter ? `<span class="tag tag-dpe" style="background:${DPE_COLORS[l.dpe_letter]}22;color:${DPE_COLORS[l.dpe_letter]}">DPE ${l.dpe_letter}</span>` : ''}
+            ${isHot ? '<span class="tag" style="background:rgba(16,185,129,0.15);color:var(--green)"><i class="fas fa-fire" style="margin-right:3px"></i>HOT</span>' : ''}
+          </div>
+          <div class="listing-metrics">
+            <span class="metric metric-price">${fmt(l.price)} €</span>
+            <span class="metric metric-details">${l.surface||'?'} m² · ${l.rooms||'?'} p.</span>
+            ${priceSqm ? `<span class="metric metric-priceSqm">${fmt(priceSqm)} €/m²</span>` : ''}
+            <span class="metric" style="gap:4px"><i class="fas fa-map-pin" style="color:var(--text3)"></i><span style="color:var(--text2)">${l.city}</span></span>
+            ${l.price_gap_percent != null ? `
+              <span class="metric metric-gap ${l.price_gap_percent<0?'under':'over'}">
+                <i class="fas fa-arrow-trend-${l.price_gap_percent<0?'down':'up'}"></i>
+                ${l.price_gap_percent>0?'+':''}${l.price_gap_percent.toFixed(1)}% vs marché
+              </span>
+            ` : ''}
+            ${l.rental_yield ? `<span class="metric metric-yield ${l.rental_yield>=7?'high':''}">Rendement : ${l.rental_yield.toFixed(1)}%</span>` : ''}
+          </div>
+          <div class="listing-time">${timeAgo(l.scraped_at)}</div>
+        </div>
+        <div class="listing-expand"><i class="fas fa-chevron-down"></i></div>
+      </div>
+      <div class="listing-details">
+        <div class="details-inner">
+          ${reasons.length ? `
+            <div class="reasons">
+              <div class="reason-title"><i class="fas fa-lightbulb" style="color:var(--orange);margin-right:4px"></i> Analyse IA</div>
+              ${reasons.map(r => `<div class="reason">${r}</div>`).join('')}
+            </div>
+          ` : ''}
+          <div class="listing-actions">
+            <a href="${l.url}" target="_blank" class="btn btn-primary" onclick="event.stopPropagation()">
+              <i class="fas fa-external-link-alt"></i> Voir l'annonce
+            </a>
+            <button class="btn btn-ghost" onclick="event.stopPropagation()">
+              <i class="fas fa-bookmark"></i> Sauvegarder
+            </button>
+            <button class="btn btn-ghost" onclick="event.stopPropagation()">
+              <i class="fas fa-phone"></i> Contacter
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== FILTERS =====
+function applyFilters() {
+  let listings = [...DATA.listings];
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const city = document.getElementById('filterCity').value;
+  const source = document.getElementById('filterSource').value;
+  const sort = document.getElementById('sortBy').value;
+  const minScore = parseInt(document.getElementById('scoreSlider').value);
+
+  if (q) listings = listings.filter(l => (l.title||'').toLowerCase().includes(q) || (l.city||'').toLowerCase().includes(q) || (l.postal_code||'').includes(q));
+  if (city !== 'all') listings = listings.filter(l => l.city === city);
+  if (source !== 'all') listings = listings.filter(l => l.source === source);
+  if (minScore > 0) listings = listings.filter(l => (l.score||0) >= minScore);
+
+  switch(sort) {
+    case 'score': listings.sort((a,b) => (b.score||0) - (a.score||0)); break;
+    case 'price_asc': listings.sort((a,b) => (a.price||0) - (b.price||0)); break;
+    case 'price_desc': listings.sort((a,b) => (b.price||0) - (a.price||0)); break;
+    case 'gap': listings.sort((a,b) => (a.price_gap_percent||0) - (b.price_gap_percent||0)); break;
+    case 'yield': listings.sort((a,b) => (b.rental_yield||0) - (a.rental_yield||0)); break;
+    case 'date': listings.sort((a,b) => new Date(b.scraped_at||0) - new Date(a.scraped_at||0)); break;
+  }
+
+  renderListings(listings);
+}
+
+function populateCityFilter() {
+  const select = document.getElementById('filterCity');
+  const cities = [...new Set(DATA.listings.map(l=>l.city).filter(Boolean))];
+  cities.forEach(c => { const o = document.createElement('option'); o.value=c; o.textContent=c; select.appendChild(o); });
+}
+
+// ===== INIT =====
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('filterCity').addEventListener('change', applyFilters);
+document.getElementById('filterSource').addEventListener('change', applyFilters);
+document.getElementById('sortBy').addEventListener('change', applyFilters);
+document.getElementById('scoreSlider').addEventListener('input', e => {
+  document.getElementById('scoreVal').textContent = e.target.value;
+  applyFilters();
+});
+
+renderStats();
+renderBarChart();
+renderCities();
+populateCityFilter();
+applyFilters();
+</script>
+</body>
+</html>

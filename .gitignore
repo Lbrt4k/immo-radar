@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+
+# Data (ne pas partager les données perso)
+data/
+*.db
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
