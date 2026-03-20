@@ -52,7 +52,7 @@ SCRAPING_CONFIG = {
 
 # === Config scoring IA ===
 SCORING_CONFIG = {
-    "model": "claude-sonnet-4-20250514",
-    "max_tokens": 1024,
+    "model": "claude-haiku-4-5-20251001",
+    "max_tokens": 512,
     "min_score_alert": 65,
 }
