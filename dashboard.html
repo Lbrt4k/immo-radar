@@ -561,7 +561,7 @@ function renderListings(listings) {
               ${reasons.map(r => `<div class="reason">${r}</div>`).join('')}
             </div>
           ` : ''}
-          ${l.investor_analysis && Object.keys(l.investor_analysis).length ? `
+          ${l.investor_analysis && (l.investor_analysis.estimated_taxes_annual || l.investor_analysis.estimated_syndic_fees_annual || l.investor_analysis.heating_type || l.investor_analysis.estimated_charges_annual || l.investor_analysis.recommended_credit_rate || l.investor_analysis.estimated_notary_fees || l.investor_analysis.blank_operation_feasible !== undefined) ? `
             <div class="investor-section">
               <div class="reason-title"><i class="fas fa-chart-line" style="color:var(--accent);margin-right:4px"></i> Analyse Investisseur</div>
               <div class="investor-grid">
@@ -571,7 +571,7 @@ function renderListings(listings) {
                 ${l.investor_analysis.estimated_charges_annual ? `<div class="investor-item"><span class="inv-label">📊 Charges annuelles</span><span class="inv-value">${l.investor_analysis.estimated_charges_annual}</span></div>` : ''}
                 ${l.investor_analysis.recommended_credit_rate ? `<div class="investor-item"><span class="inv-label">📈 Taux crédit</span><span class="inv-value">${l.investor_analysis.recommended_credit_rate}</span></div>` : ''}
                 ${l.investor_analysis.estimated_notary_fees ? `<div class="investor-item"><span class="inv-label">📋 Notaire</span><span class="inv-value">${l.investor_analysis.estimated_notary_fees}</span></div>` : ''}
-                ${l.investor_analysis.blank_operation_feasible !== undefined ? `<div class="investor-item"><span class="inv-label">✅ Op. Blanche</span><span class="inv-value">${l.investor_analysis.blank_operation_feasible ? 'Oui' : 'Non'}</span></span></div>` : ''}
+                ${l.investor_analysis.blank_operation_feasible !== undefined ? `<div class="investor-item"><span class="inv-label">✅ Op. Blanche</span><span class="inv-value">${l.investor_analysis.blank_operation_feasible ? 'Oui' : 'Non'}</span></div>` : ''}
               </div>
             </div>
           ` : ''}
